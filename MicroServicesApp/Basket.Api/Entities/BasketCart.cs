@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Basket.Api.Entities
@@ -8,11 +9,8 @@ namespace Basket.Api.Entities
     public class BasketCart
     {
         public string UserName { get; set; }
+        [JsonPropertyName("items")]
         public List<BasketCartItem> Items { get; set; } = new List<BasketCartItem>();
-        public BasketCart(string userName)
-        {
-            UserName = userName;
-        }
         public decimal TotalPrice
         {
             get

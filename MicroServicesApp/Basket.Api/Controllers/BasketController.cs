@@ -26,7 +26,15 @@ namespace Basket.Api.Controllers
         public async Task<ActionResult<BasketCart>> GetBasket(string userName)
         {
             var basket = await _repository.GetBasket(userName);
-            return Ok(basket ?? new BasketCart(userName));
+            if (basket != null)
+            {
+                return Ok(basket);
+
+            }
+            var bskt = new BasketCart();
+            bskt.UserName = userName;
+
+            return Ok(bskt);
         }
 
         [HttpPost]
