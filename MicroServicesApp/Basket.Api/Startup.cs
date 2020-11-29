@@ -2,6 +2,7 @@ using Basket.Api.Data;
 using Basket.Api.Data.Interfaces;
 using Basket.Api.Repository;
 using Basket.Api.Repository.Interfaces;
+using EventBusRabbitMQ;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -11,11 +12,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using RabbitMQ.Client;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using EventBusRabbitMQ.Producer;
 
 namespace Basket.Api
 {
@@ -42,8 +46,21 @@ namespace Basket.Api
             services.AddTransient<IBasketRepository, BasketRepository>();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Catalog Microservice", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Basket Microservice", Version = "v1" });
             });
+            services.AddAutoMapper(typeof(Startup));
+            services.AddSingleton<IRabbitMQConnection>(
+                sp =>
+                {
+                    var factory = new ConnectionFactory
+                    {
+                        HostName = Configuration["EventBus:HostName"],
+                        UserName = Configuration["EventBus:UserName"],
+                        Password = Configuration["EventBus:Password"]
+                    };
+                    return new RabbitMQConnection(factory);
+                });
+            services.AddSingleton<EventBusRabbitMQProducer>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -67,7 +84,7 @@ namespace Basket.Api
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Banking Microservice V1");
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Basket Microservice V1");
             });
         }
     }

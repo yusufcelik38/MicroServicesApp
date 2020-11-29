@@ -1,10 +1,10 @@
 ﻿using Basket.Api.Data.Interfaces;
 using Basket.Api.Entities;
 using Basket.Api.Repository.Interfaces;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Basket.Api.Repository
@@ -34,14 +34,14 @@ namespace Basket.Api.Repository
             {
                 return null;
             }
-            return JsonSerializer.Deserialize<BasketCart>(basket);
+            return JsonConvert.DeserializeObject<BasketCart>(basket);
         }
 
         public async Task<BasketCart> UpdateBasket(BasketCart basket)
         {
             var updated = await _context
                 .Redis
-                .StringSetAsync(basket.UserName, JsonSerializer.Serialize(basket));
+                .StringSetAsync(basket.UserName, JsonConvert.SerializeObject(basket));
             return updated ? await GetBasket(basket.UserName) : null;
         }
     }
